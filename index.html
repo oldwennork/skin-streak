@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Skin Streak">
+<meta name="theme-color" content="#f6f4fb" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#13111c" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<title>Skin Streak</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap">
+<style>
+/* Layout: one narrow column — tonight's card, score strip, then stats & charts. Night day rolls at 05:00. */
+:root{
+  --bg:#f6f4fb; --surface:#ffffff; --fg:#1d1a2e; --muted:#6f6a86; --line:#e7e3f2;
+  --dif:#6c4cf5; --dif-soft:#ece7ff; --aha:#ff7a3d; --aha-soft:#ffecdf;
+  --ok:#17b26a; --gold:#f5b400;
+  --display:"Mitr","IBM Plex Sans Thai",system-ui,sans-serif;
+  --body:"IBM Plex Sans Thai",system-ui,sans-serif;
+  --shadow:0 1px 2px rgba(40,20,90,.06),0 8px 24px rgba(40,20,90,.07);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#13111c; --surface:#1d1a29; --fg:#f2effa; --muted:#a29dba; --line:#2d2940;
+  --dif:#9b85ff; --dif-soft:#2a2350; --aha:#ff9563; --aha-soft:#3a2418; --ok:#3bd68c; --gold:#ffcc33;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#13111c; --surface:#1d1a29; --fg:#f2effa; --muted:#a29dba; --line:#2d2940;
+  --dif:#9b85ff; --dif-soft:#2a2350; --aha:#ff9563; --aha-soft:#3a2418; --ok:#3bd68c; --gold:#ffcc33;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25); color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:460px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1,h2,.num{font-family:var(--display);font-weight:500;margin:0}
+.num{font-variant-numeric:tabular-nums}
+header{display:flex;justify-content:space-between;align-items:center}
+header h1{font-size:22px;letter-spacing:-.01em}
+.lvl{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.lvl b{font-family:var(--display);font-weight:500;color:var(--fg);background:var(--surface);border:1px solid var(--line);padding:2px 10px;border-radius:99px}
+
+/* tonight card */
+.tonight{position:relative;border-radius:28px;padding:22px 22px 24px;color:#fff;overflow:hidden;
+  background:var(--c);transition:background .5s ease;box-shadow:var(--shadow);isolation:isolate}
+.tonight::before{content:"";position:absolute;width:260px;height:260px;border-radius:50%;right:-80px;top:-110px;
+  background:rgba(255,255,255,.14);z-index:-1;animation:float 9s ease-in-out infinite}
+.tonight::after{content:"";position:absolute;width:140px;height:140px;border-radius:50%;left:-40px;bottom:-60px;
+  background:rgba(255,255,255,.1);z-index:-1;animation:float 11s ease-in-out infinite reverse}
+@keyframes float{50%{transform:translate(-14px,12px) scale(1.05)}}
+.tonight.dif{--c:var(--dif)} .tonight.aha{--c:var(--aha)}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.85}
+.prod{font-family:var(--display);font-size:38px;font-weight:600;line-height:1.1;margin:4px 0 2px}
+.sub{opacity:.9;font-size:14px}
+.swap{position:absolute;right:16px;top:16px;background:rgba(255,255,255,.2);border:0;color:#fff;border-radius:99px;
+  padding:6px 12px;font:500 12px var(--body);cursor:pointer;transition:background .2s}
+.swap:hover{background:rgba(255,255,255,.32)}
+.swap:focus-visible,.btn:focus-visible,.day:focus-visible,.pick button:focus-visible{outline:3px solid var(--fg);outline-offset:2px}
+.btn{margin-top:18px;width:100%;height:60px;border:0;border-radius:18px;background:#fff;color:var(--c);
+  font:600 18px var(--display);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;
+  transition:transform .15s cubic-bezier(.3,1.6,.5,1),box-shadow .2s;box-shadow:0 6px 0 rgba(0,0,0,.12)}
+.btn:active{transform:translateY(4px) scale(.98);box-shadow:0 2px 0 rgba(0,0,0,.12)}
+.btn.done{background:rgba(255,255,255,.2);color:#fff;box-shadow:none}
+.check{width:26px;height:26px}
+.check path{stroke-dasharray:24;stroke-dashoffset:24}
+.btn.done .check path{animation:draw .45s .1s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.undo{margin-top:10px;background:none;border:0;color:#fff;opacity:.8;font:13px var(--body);text-decoration:underline;cursor:pointer;padding:4px}
+.yday{margin-top:14px;font-size:13px;opacity:.9;display:flex;gap:6px;align-items:center}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
+.pick{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.pick button{height:56px;border:0;border-radius:16px;background:#fff;font:600 16px var(--display);cursor:pointer;transition:transform .15s}
+.pick button:active{transform:scale(.96)}
+.tonight.first{--c:linear-gradient(135deg,var(--dif),var(--aha))}
+
+/* score strip */
+.strip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:var(--surface);border-radius:20px;padding:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:2px;min-width:0}
+.stat .num{font-size:28px;line-height:1.1}
+.stat small{color:var(--muted);font-size:12px}
+.stat.fire .num{color:var(--aha)} .stat.pts .num{color:var(--dif)}
+.bar{height:6px;background:var(--line);border-radius:9px;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--dif),var(--aha));border-radius:9px;transition:width .9s cubic-bezier(.2,.8,.2,1)}
+
+.card{background:var(--surface);border-radius:24px;padding:18px;box-shadow:var(--shadow);min-width:0}
+.card h2{font-size:17px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.card h2 span{font:400 12px var(--body);color:var(--muted)}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-top:4px}
+.legend span{display:flex;gap:6px;align-items:center}
+
+/* calendar */
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:12px}
+.cal .wd{font-size:11px;color:var(--muted);text-align:center}
+.day{aspect-ratio:1;max-width:100%;border-radius:12px;border:0;background:var(--bg);color:var(--muted);font:500 12px var(--display);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s cubic-bezier(.3,1.6,.5,1),background .3s;padding:0}
+.day:hover{transform:scale(1.08)}
+.day.d{background:var(--dif);color:#fff} .day.a{background:var(--aha);color:#fff}
+.day.today{box-shadow:inset 0 0 0 2px var(--fg)}
+.day.future{opacity:.35;cursor:default}
+.day.future:hover{transform:none}
+.hint{font-size:12px;color:var(--muted);margin:10px 0 0}
+
+svg text{font-family:var(--body);fill:var(--muted);font-size:11px}
+.chartwrap{margin-top:10px}
+.split{display:flex;height:14px;border-radius:9px;overflow:hidden;margin-top:12px;background:var(--line)}
+.split i{transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.splitlbl{display:flex;justify-content:space-between;font-size:13px;margin-top:8px}
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.badge{font-size:12px;padding:6px 10px;border-radius:99px;background:var(--bg);color:var(--muted);border:1px dashed var(--line)}
+.badge.on{background:var(--dif-soft);color:var(--fg);border:1px solid transparent}
+.sync{font-size:12px;color:var(--muted);text-align:center}
+
+/* entrance + effects */
+.in{animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{transform:translateY(14px)}}
+.pop{animation:pop .5s cubic-bezier(.3,1.8,.5,1)}
+@keyframes pop{40%{transform:scale(1.18)}}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:50}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,120px);background:var(--fg);color:var(--bg);
+  padding:10px 18px;border-radius:99px;font:500 14px var(--display);transition:transform .45s cubic-bezier(.3,1.5,.5,1);z-index:60;white-space:nowrap}
+.toast.show{transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;-webkit-tap-highlight-color:transparent}
+.tools{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.tools button,.tools label{background:var(--surface);border:1px solid var(--line);color:var(--fg);border-radius:99px;padding:8px 14px;font:500 13px var(--body);cursor:pointer}
+.tools input{display:none}
+</style>
+</head>
+<body>
+
+<canvas id="fx"></canvas>
+<div class="wrap">
+  <header class="in">
+    <h1>Skin Streak</h1>
+    <div class="lvl">เลเวล <b id="lvl" class="num">1</b></div>
+  </header>
+
+  <section id="tonight" class="tonight in" style="animation-delay:.05s"></section>
+
+  <div class="strip in" style="animation-delay:.12s">
+    <div class="stat fire"><span class="num" id="streak">0</span><small>วันติดกัน 🔥</small></div>
+    <div class="stat pts"><span class="num" id="pts">0</span><small>แต้มสะสม</small><div class="bar"><i id="lvlbar" style="width:0"></i></div></div>
+    <div class="stat"><span class="num" id="rate">0%</span><small>ทาครบ 30 วัน</small></div>
+  </div>
+
+  <section class="card in" style="animation-delay:.18s">
+    <h2>ปฏิทิน <span>แตะวันเพื่อแก้ไข</span></h2>
+    <div class="legend"><span><i class="dot" style="background:var(--dif)"></i>Differin</span><span><i class="dot" style="background:var(--aha)"></i>กรดผลไม้</span></div>
+    <div class="cal" id="cal"></div>
+    <p class="hint">ทาหลังเที่ยงคืนจนถึงตีห้า นับเป็นของคืนก่อนหน้า</p>
+  </section>
+
+  <section class="card in" style="animation-delay:.24s">
+    <h2>เวลาที่ทายา <span id="avgTime">14 คืนล่าสุด</span></h2>
+    <div class="chartwrap" id="timeChart"></div>
+  </section>
+
+  <section class="card in" style="animation-delay:.3s">
+    <h2>สัดส่วนการใช้ <span id="total">ทั้งหมด 0 ครั้ง</span></h2>
+    <div class="split"><i id="sd" style="width:50%;background:var(--dif)"></i><i id="sa" style="width:50%;background:var(--aha)"></i></div>
+    <div class="splitlbl"><span id="ld">Differin 0</span><span id="la">กรดผลไม้ 0</span></div>
+    <h2 style="margin-top:18px">เหรียญรางวัล</h2>
+    <div class="badges" id="badges"></div>
+  </section>
+
+  <div class="tools"><button type="button" onclick="exportData()">สำรองข้อมูล</button><label for="imp">นำเข้าข้อมูล<input id="imp" type="file" accept=".json,application/json" onchange="importData(this.files[0]);this.value=''"></label></div>
+  <p class="sync" id="sync">ข้อมูลเก็บในเครื่องนี้ กดสำรองข้อมูลไว้บ้างเผื่อเปลี่ยนเครื่อง</p>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const P={d:{name:"Differin",th:"Differin",cls:"dif",css:"--dif"},a:{name:"กรดผลไม้",th:"กรดผลไม้ (AHA)",cls:"aha",css:"--aha"}};
+const ROLL=5; // day rolls at 05:00
+let log={}; // {"YYYY-MM-DD":{p:"d"|"a",t:ms}}
+let shown={pts:0};
+const $=id=>document.getElementById(id);
+const pad=n=>String(n).padStart(2,"0");
+const keyOf=d=>{const x=new Date(d.getTime()-ROLL*3600e3);return x.getFullYear()+"-"+pad(x.getMonth()+1)+"-"+pad(x.getDate())};
+const fromKey=k=>{const [y,m,d]=k.split("-").map(Number);return new Date(y,m-1,d,12)};
+const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())};
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const other=p=>p==="d"?"a":"d";
+
+/* ---------- storage ---------- */
+function loadLocal(){try{const s=localStorage.getItem("skinlog");if(s)log=JSON.parse(s)||{}}catch(e){}}
+function save(){
+  try{localStorage.setItem("skinlog",JSON.stringify(log))}catch(e){}
+  }
+function exportData(){
+  const blob=new Blob([JSON.stringify({app:"skin-streak",log},null,1)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="skin-streak-"+keyOf(new Date())+".json";a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);toast("สำรองข้อมูลแล้ว");
+}
+function importData(f){
+  if(!f)return;const r=new FileReader();
+  r.onload=()=>{try{const d=JSON.parse(r.result);const l=d.log||d;if(typeof l!=="object")throw 0;log={...log,...l};save();render();toast("นำเข้าข้อมูลแล้ว")}catch(e){toast("ไฟล์นี้ใช้ไม่ได้ ลองเลือกไฟล์ .json ที่สำรองไว้")}};
+  r.readAsText(f);
+}
+
+/* ---------- derived stats ---------- */
+function stats(){
+  const today=keyOf(new Date());
+  const keys=Object.keys(log).sort();
+  // streak: consecutive days ending today (or yesterday if today not done yet)
+  let s=0,k=log[today]?today:addDays(today,-1);
+  while(log[k]){s++;k=addDays(k,-1)}
+  // points + best streak
+  let pts=0,run=0,best=0,prev=null,alt=0;
+  for(const k of keys){
+    const cont=prev&&addDays(prev,1)===k;
+    run=cont?run+1:1; best=Math.max(best,run);
+    pts+=10;
+    if(cont&&log[prev].p!==log[k].p){pts+=5;alt++}
+    if(run%7===0)pts+=30;
+    prev=k;
+  }
+  let done30=0;for(let i=0;i<30;i++)if(log[addDays(today,-i)])done30++;
+  const cnt={d:0,a:0};keys.forEach(k=>cnt[log[k].p]++);
+  return {today,streak:s,best,pts,lvl:Math.floor(pts/100)+1,lvlPct:pts%100,rate:Math.round(done30/30*100),cnt,total:keys.length,alt};
+}
+function suggested(today){
+  const y=log[addDays(today,-1)];
+  if(y)return other(y.p);
+  const keys=Object.keys(log).filter(k=>k<today).sort();
+  return keys.length?other(log[keys[keys.length-1]].p):null;
+}
+let override=null;
+
+/* ---------- render ---------- */
+function render(){
+  const st=stats(),t=st.today,done=log[t];
+  const yk=addDays(t,-1),y=log[yk];
+  const sug=done?done.p:(override||suggested(t));
+  const el=$("tonight");
+  if(!sug){
+    el.className="tonight first";
+    el.innerHTML=`<div class="eyebrow">เริ่มต้นใช้งาน</div><div class="prod" style="font-size:30px">คืนนี้ทาตัวไหน?</div>
+      <div class="sub">เลือกครั้งแรก แล้วแอพจะสลับให้อัตโนมัติทุกวัน</div>
+      <div class="pick"><button style="color:var(--dif)" onclick="mark('d')">Differin</button><button style="color:var(--aha)" onclick="mark('a')">กรดผลไม้</button></div>`;
+  }else{
+    const p=P[sug];
+    el.className="tonight "+p.cls;
+    const tm=done?new Date(done.t):null;
+    el.innerHTML=`<div class="eyebrow">${done?"คืนนี้ทาแล้ว":"คืนนี้ต้องทา"}</div>
+      <div class="prod">${p.th}</div>
+      <div class="sub">${done?"ทาเมื่อ "+pad(tm.getHours())+":"+pad(tm.getMinutes())+" น. · พรุ่งนี้ "+P[other(sug)].name:"พรุ่งนี้สลับเป็น "+P[other(sug)].name}</div>
+      ${done?"":`<button class="swap" onclick="override='${other(sug)}';render()">สลับ</button>`}
+      <button class="btn ${done?"done":""}" id="markBtn" ${done?"disabled":""} onclick="mark('${sug}')">
+        <svg class="check" viewBox="0 0 26 26" fill="none"><path d="M6 13.5l5 5 9-11" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        ${done?"เรียบร้อย":"ทาแล้ว"}</button>
+      ${done?`<button class="undo" onclick="undo()">ยกเลิก กดผิด</button>`:""}
+      <div class="yday"><i class="dot" style="background:#fff;opacity:${y?1:.4}"></i>เมื่อวาน: ${y?P[y.p].name:"ไม่ได้บันทึก"}</div>`;
+  }
+  $("streak").textContent=st.streak;
+  $("rate").textContent=st.rate+"%";
+  const lv=$("lvl");if(lv.textContent!=String(st.lvl)){lv.textContent=st.lvl;lv.classList.remove("pop");void lv.offsetWidth;lv.classList.add("pop")}
+  countTo($("pts"),shown.pts,st.pts);shown.pts=st.pts;
+  requestAnimationFrame(()=>{$("lvlbar").style.width=st.lvlPct+"%"});
+  renderCal(t);renderTime(t);
+  const tot=st.total||1;
+  $("sd").style.width=(st.total?st.cnt.d/tot*100:50)+"%";$("sa").style.width=(st.total?st.cnt.a/tot*100:50)+"%";
+  $("ld").textContent="Differin "+st.cnt.d;$("la").textContent="กรดผลไม้ "+st.cnt.a;
+  $("total").textContent="ทั้งหมด "+st.total+" ครั้ง";
+  const B=[["ทาครั้งแรก",st.total>=1],["ติดกัน 3 วัน",st.best>=3],["ติดกัน 7 วัน",st.best>=7],["สลับถูก 10 ครั้ง",st.alt>=10],["ติดกัน 30 วัน",st.best>=30],["ทาครบ 100 ครั้ง",st.total>=100]];
+  $("badges").innerHTML=B.map(([n,on])=>`<span class="badge ${on?"on":""}">${on?"★ ":""}${n}</span>`).join("");
+}
+function countTo(el,from,to){
+  if(matchMedia("(prefers-reduced-motion:reduce)").matches||from===to){el.textContent=to;return}
+  const t0=performance.now(),d=700;
+  const step=now=>{const k=Math.min(1,(now-t0)/d),e=1-Math.pow(1-k,3);el.textContent=Math.round(from+(to-from)*e);if(k<1)requestAnimationFrame(step)};
+  requestAnimationFrame(step);
+  if(to>from){el.classList.remove("pop");void el.offsetWidth;el.classList.add("pop")}
+}
+function renderCal(t){
+  const tD=fromKey(t),dow=(tD.getDay()+6)%7; // Monday first
+  const start=addDays(t,-(dow+28));
+  let h=["จ","อ","พ","พฤ","ศ","ส","อา"].map(w=>`<div class="wd">${w}</div>`).join("");
+  for(let i=0;i<35;i++){
+    const k=addDays(start,i),e=log[k],fut=k>t;
+    h+=`<button class="day ${e?e.p:""} ${k===t?"today":""} ${fut?"future":""}" ${fut?"disabled":""} aria-label="${k}" onclick="cycle('${k}')" style="animation-delay:${i*12}ms">${fromKey(k).getDate()}</button>`;
+  }
+  $("cal").innerHTML=h;
+}
+function renderTime(t){
+  const W=420,H=190,L=44,R=8,T=10,B=24;
+  const days=[...Array(14)].map((_,i)=>addDays(t,i-13));
+  const pts=days.map(k=>{const e=log[k];if(!e)return null;const d=new Date(e.t);let h=d.getHours()+d.getMinutes()/60;if(h<12)h+=24;return {k,h,p:e.p}});
+  const hs=pts.filter(Boolean).map(p=>p.h);
+  let lo=Math.min(19,...hs),hi=Math.max(27,...hs);lo=Math.floor(lo/2)*2;hi=Math.ceil(hi/2)*2;
+  const x=i=>L+(i+.5)*(W-L-R)/14,y=h=>T+(h-lo)/(hi-lo)*(H-T-B);
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="เวลาที่ทายาแต่ละคืน">`;
+  for(let h=lo;h<=hi;h+=2){s+=`<line x1="${L}" x2="${W-R}" y1="${y(h)}" y2="${y(h)}" stroke="${css("--line")}"/><text x="${L-6}" y="${y(h)+4}" text-anchor="end">${pad(h%24)}:00</text>`}
+  days.forEach((k,i)=>{if(i%2===1||i===13)s+=`<text x="${x(i)}" y="${H-6}" text-anchor="middle" ${k===t?`style="fill:${css("--fg")};font-weight:600"`:""}>${fromKey(k).getDate()}</text>`});
+  const v=pts.map((p,i)=>p&&[x(i),y(p.h)]).filter(Boolean);
+  if(v.length>1)s+=`<polyline points="${v.map(a=>a.join(",")).join(" ")}" fill="none" stroke="${css("--muted")}" stroke-opacity=".35" stroke-width="2" stroke-dasharray="4 4"/>`;
+  pts.forEach((p,i)=>{if(p)s+=`<circle cx="${x(i)}" cy="${y(p.h)}" r="7" fill="${css(P[p.p].css)}" stroke="${css("--surface")}" stroke-width="2.5"><animate attributeName="r" from="0" to="7" dur=".5s" begin="${i*0.04}s" fill="freeze" calcMode="spline" keySplines=".3 1.6 .5 1" keyTimes="0;1"/></circle>`});
+  if(!v.length)s+=`<text x="${(W+L)/2}" y="${H/2}" text-anchor="middle" style="font-size:13px">กด "ทาแล้ว" แล้วจุดเวลาจะขึ้นที่นี่</text>`;
+  s+="</svg>";
+  $("timeChart").innerHTML=s;
+  if(hs.length){const a=hs.reduce((q,w)=>q+w,0)/hs.length,hh=Math.floor(a)%24,mm=Math.round((a%1)*60)%60;$("avgTime").textContent="เฉลี่ย "+pad(hh)+":"+pad(mm)+" น."}
+  else $("avgTime").textContent="14 คืนล่าสุด";
+}
+
+/* ---------- actions ---------- */
+function mark(p){
+  const t=keyOf(new Date());if(log[t])return;
+  const before=stats().pts;
+  log[t]={p,t:Date.now()};override=null;save();
+  const after=stats();
+  render();
+  const b=$("markBtn");const r=(b||$("tonight")).getBoundingClientRect();
+  burst(r.left+r.width/2,r.top+r.height/2);
+  toast("+"+(after.pts-before)+" แต้ม · ติดกัน "+after.streak+" วัน");
+}
+function undo(){delete log[keyOf(new Date())];save();render();toast("ยกเลิกแล้ว")}
+function cycle(k){
+  const e=log[k],t=keyOf(new Date());
+  const base=fromKey(k);base.setHours(22,0,0,0);
+  const tm=k===t?Date.now():base.getTime();
+  if(!e)log[k]={p:"d",t:tm};else if(e.p==="d")log[k]={p:"a",t:e.t};else delete log[k];
+  save();render();
+  toast(log[k]?fromKey(k).getDate()+" → "+P[log[k].p].name:fromKey(k).getDate()+" → ไม่ได้ทา");
+}
+let tt;function toast(m){const el=$("toast");el.textContent=m;el.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>el.classList.remove("show"),2200)}
+
+/* ---------- confetti ---------- */
+const cv=$("fx"),cx=cv.getContext("2d");let parts=[],raf=0;
+function size(){cv.width=innerWidth*devicePixelRatio;cv.height=innerHeight*devicePixelRatio;cv.style.width=innerWidth+"px";cv.style.height=innerHeight+"px"}
+addEventListener("resize",size);size();
+function burst(x,y){
+  if(matchMedia("(prefers-reduced-motion:reduce)").matches)return;
+  const cols=[css("--dif"),css("--aha"),css("--gold"),css("--ok"),"#ff5fa2"];
+  for(let i=0;i<90;i++){const a=Math.random()*Math.PI*2,s=4+Math.random()*9;
+    parts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-6,r:3+Math.random()*4,c:cols[i%cols.length],rot:Math.random()*6,vr:(Math.random()-.5)*.4,life:1,sq:Math.random()<.5})}
+  if(!raf)raf=requestAnimationFrame(tick);
+}
+function tick(){
+  const d=devicePixelRatio;cx.clearRect(0,0,cv.width,cv.height);
+  parts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.35;p.vx*=.98;p.rot+=p.vr;p.life-=.012;
+    cx.save();cx.globalAlpha=Math.max(0,p.life);cx.translate(p.x*d,p.y*d);cx.rotate(p.rot);cx.fillStyle=p.c;
+    if(p.sq)cx.fillRect(-p.r*d,-p.r*d*.5,p.r*2*d,p.r*d);else{cx.beginPath();cx.arc(0,0,p.r*d,0,7);cx.fill()}cx.restore()});
+  parts=parts.filter(p=>p.life>0&&p.y<innerHeight+40);
+  raf=parts.length?requestAnimationFrame(tick):(cx.clearRect(0,0,cv.width,cv.height),0);
+}
+
+/* refresh when the night rolls over */
+let lastKey=keyOf(new Date());
+setInterval(()=>{const k=keyOf(new Date());if(k!==lastKey){lastKey=k;override=null;render()}},60000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)render()});
+
+loadLocal();render();
+</script>
+
+</body>
+</html>
