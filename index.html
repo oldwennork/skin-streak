@@ -7,8 +7,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skin Streak">
-<meta name="theme-color" content="#f6f4fb" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#13111c" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f4efe7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1d1a16" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon-192.png">
@@ -18,21 +18,21 @@
 <style>
 /* Layout: one narrow column — tonight's card, score strip, then stats & charts. Night day rolls at 05:00. */
 :root{
-  --bg:#f6f4fb; --surface:#ffffff; --fg:#1d1a2e; --muted:#6f6a86; --line:#e7e3f2;
-  --dif:#6c4cf5; --dif-soft:#ece7ff; --aha:#ff7a3d; --aha-soft:#ffecdf;
-  --ok:#17b26a; --gold:#f5b400;
+  --bg:#f4efe7; --surface:#fbf8f3; --fg:#3d352d; --muted:#8c8174; --line:#e6ded2;
+  --dif:#869a76; --dif-soft:#e3e9da; --dif-ink:#4f6142; --aha:#c8876a; --aha-soft:#f3e1d6; --aha-ink:#8a4f37;
+  --ok:#869a76; --gold:#d2b06e; --ink-on:#fbf8f3;
   --display:"Mitr","IBM Plex Sans Thai",system-ui,sans-serif;
   --body:"IBM Plex Sans Thai",system-ui,sans-serif;
-  --shadow:0 1px 2px rgba(40,20,90,.06),0 8px 24px rgba(40,20,90,.07);
+  --shadow:none;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#13111c; --surface:#1d1a29; --fg:#f2effa; --muted:#a29dba; --line:#2d2940;
-  --dif:#9b85ff; --dif-soft:#2a2350; --aha:#ff9563; --aha-soft:#3a2418; --ok:#3bd68c; --gold:#ffcc33;
-  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25); color-scheme:dark}}
+  --bg:#1d1a16; --surface:#26221d; --fg:#ede6db; --muted:#a3988a; --line:#38322b;
+  --dif:#9fb18e; --dif-soft:#2e3428; --dif-ink:#c4d3b5; --aha:#d79c80; --aha-soft:#3b2c24; --aha-ink:#efc2ab;
+  --ok:#9fb18e; --gold:#dcc086; --ink-on:#1d1a16; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#13111c; --surface:#1d1a29; --fg:#f2effa; --muted:#a29dba; --line:#2d2940;
-  --dif:#9b85ff; --dif-soft:#2a2350; --aha:#ff9563; --aha-soft:#3a2418; --ok:#3bd68c; --gold:#ffcc33;
-  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25); color-scheme:dark}
+  --bg:#1d1a16; --surface:#26221d; --fg:#ede6db; --muted:#a3988a; --line:#38322b;
+  --dif:#9fb18e; --dif-soft:#2e3428; --dif-ink:#c4d3b5; --aha:#d79c80; --aha-soft:#3b2c24; --aha-ink:#efc2ab;
+  --ok:#9fb18e; --gold:#dcc086; --ink-on:#1d1a16; color-scheme:dark}
 
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5;
@@ -46,48 +46,43 @@ header h1{font-size:22px;letter-spacing:-.01em}
 .lvl b{font-family:var(--display);font-weight:500;color:var(--fg);background:var(--surface);border:1px solid var(--line);padding:2px 10px;border-radius:99px}
 
 /* tonight card */
-.tonight{position:relative;border-radius:28px;padding:22px 22px 24px;color:#fff;overflow:hidden;
-  background:var(--c);transition:background .5s ease;box-shadow:var(--shadow);isolation:isolate}
-.tonight::before{content:"";position:absolute;width:260px;height:260px;border-radius:50%;right:-80px;top:-110px;
-  background:rgba(255,255,255,.14);z-index:-1;animation:float 9s ease-in-out infinite}
-.tonight::after{content:"";position:absolute;width:140px;height:140px;border-radius:50%;left:-40px;bottom:-60px;
-  background:rgba(255,255,255,.1);z-index:-1;animation:float 11s ease-in-out infinite reverse}
-@keyframes float{50%{transform:translate(-14px,12px) scale(1.05)}}
-.tonight.dif{--c:var(--dif)} .tonight.aha{--c:var(--aha)}
-.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.85}
-.prod{font-family:var(--display);font-size:38px;font-weight:600;line-height:1.1;margin:4px 0 2px}
-.sub{opacity:.9;font-size:14px}
-.swap{position:absolute;right:16px;top:16px;background:rgba(255,255,255,.2);border:0;color:#fff;border-radius:99px;
+.tonight{position:relative;border-radius:24px;padding:22px 22px 24px;color:var(--fg);overflow:hidden;
+  background:var(--soft);transition:background .5s ease;isolation:isolate}
+.tonight.dif{--c:var(--dif);--soft:var(--dif-soft);--ink:var(--dif-ink)} .tonight.aha{--c:var(--aha);--soft:var(--aha-soft);--ink:var(--aha-ink)}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.prod{font-family:var(--display);font-size:38px;font-weight:500;color:var(--ink);line-height:1.1;margin:4px 0 2px}
+.sub{color:var(--muted);font-size:14px}
+.swap{position:absolute;right:16px;top:16px;background:var(--surface);border:1px solid var(--line);color:var(--fg);border-radius:99px;
   padding:6px 12px;font:500 12px var(--body);cursor:pointer;transition:background .2s}
-.swap:hover{background:rgba(255,255,255,.32)}
-.swap:focus-visible,.btn:focus-visible,.day:focus-visible,.pick button:focus-visible{outline:3px solid var(--fg);outline-offset:2px}
-.btn{margin-top:18px;width:100%;height:60px;border:0;border-radius:18px;background:#fff;color:var(--c);
-  font:600 18px var(--display);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;
-  transition:transform .15s cubic-bezier(.3,1.6,.5,1),box-shadow .2s;box-shadow:0 6px 0 rgba(0,0,0,.12)}
-.btn:active{transform:translateY(4px) scale(.98);box-shadow:0 2px 0 rgba(0,0,0,.12)}
-.btn.done{background:rgba(255,255,255,.2);color:#fff;box-shadow:none}
+.swap:hover{background:var(--bg)}
+.swap:focus-visible,.btn:focus-visible,.undo:focus-visible,.day:focus-visible,.pick button:focus-visible{outline:3px solid var(--fg);outline-offset:2px}
+.btn{margin-top:18px;width:100%;height:60px;border:0;border-radius:16px;background:var(--c);color:var(--ink-on);
+  font:500 18px var(--display);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;
+  transition:transform .15s cubic-bezier(.3,1.6,.5,1),box-shadow .2s;box-shadow:0 4px 0 var(--ink)}
+.btn:active{transform:translateY(4px) scale(.98);box-shadow:0 1px 0 var(--ink)}
+.btn.done{background:var(--surface);color:var(--ink);box-shadow:none;border:1px solid var(--line)}
 .check{width:26px;height:26px}
 .check path{stroke-dasharray:24;stroke-dashoffset:24}
 .btn.done .check path{animation:draw .45s .1s ease forwards}
 @keyframes draw{to{stroke-dashoffset:0}}
-.undo{margin-top:10px;background:none;border:0;color:#fff;opacity:.8;font:13px var(--body);text-decoration:underline;cursor:pointer;padding:4px}
-.yday{margin-top:14px;font-size:13px;opacity:.9;display:flex;gap:6px;align-items:center}
+.undo{margin-top:10px;background:none;border:0;color:var(--muted);font:13px var(--body);text-decoration:underline;cursor:pointer;padding:4px}
+.yday{margin-top:14px;font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center}
 .dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
 .pick{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
-.pick button{height:56px;border:0;border-radius:16px;background:#fff;font:600 16px var(--display);cursor:pointer;transition:transform .15s}
+.pick button{height:56px;border:1px solid var(--line);border-radius:16px;background:var(--surface);font:500 16px var(--display);cursor:pointer;transition:transform .15s}
 .pick button:active{transform:scale(.96)}
-.tonight.first{--c:linear-gradient(135deg,var(--dif),var(--aha))}
+.tonight.first{--soft:var(--surface);--ink:var(--fg);border:1px solid var(--line)}
 
 /* score strip */
 .strip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.stat{background:var(--surface);border-radius:20px;padding:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:2px;min-width:0}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:2px;min-width:0}
 .stat .num{font-size:28px;line-height:1.1}
 .stat small{color:var(--muted);font-size:12px}
-.stat.fire .num{color:var(--aha)} .stat.pts .num{color:var(--dif)}
+.stat.fire .num{color:var(--aha-ink)} .stat.pts .num{color:var(--dif-ink)}
 .bar{height:6px;background:var(--line);border-radius:9px;overflow:hidden;margin-top:6px}
-.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--dif),var(--aha));border-radius:9px;transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.bar i{display:block;height:100%;background:var(--dif);border-radius:9px;transition:width .9s cubic-bezier(.2,.8,.2,1)}
 
-.card{background:var(--surface);border-radius:24px;padding:18px;box-shadow:var(--shadow);min-width:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:18px;min-width:0}
 .card h2{font-size:17px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
 .card h2 span{font:400 12px var(--body);color:var(--muted)}
 .legend{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-top:4px}
@@ -99,7 +94,7 @@ header h1{font-size:22px;letter-spacing:-.01em}
 .day{aspect-ratio:1;max-width:100%;border-radius:12px;border:0;background:var(--bg);color:var(--muted);font:500 12px var(--display);
   cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s cubic-bezier(.3,1.6,.5,1),background .3s;padding:0}
 .day:hover{transform:scale(1.08)}
-.day.d{background:var(--dif);color:#fff} .day.a{background:var(--aha);color:#fff}
+.day.d{background:var(--dif);color:var(--ink-on)} .day.a{background:var(--aha);color:var(--ink-on)}
 .day.today{box-shadow:inset 0 0 0 2px var(--fg)}
 .day.future{opacity:.35;cursor:default}
 .day.future:hover{transform:none}
@@ -112,7 +107,7 @@ svg text{font-family:var(--body);fill:var(--muted);font-size:11px}
 .splitlbl{display:flex;justify-content:space-between;font-size:13px;margin-top:8px}
 .badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .badge{font-size:12px;padding:6px 10px;border-radius:99px;background:var(--bg);color:var(--muted);border:1px dashed var(--line)}
-.badge.on{background:var(--dif-soft);color:var(--fg);border:1px solid transparent}
+.badge.on{background:var(--dif-soft);color:var(--dif-ink);border:1px solid transparent}
 .sync{font-size:12px;color:var(--muted);text-align:center}
 
 /* entrance + effects */
@@ -122,8 +117,8 @@ svg text{font-family:var(--body);fill:var(--muted);font-size:11px}
 @keyframes pop{40%{transform:scale(1.18)}}
 #fx{position:fixed;inset:0;pointer-events:none;z-index:50}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,120px);background:var(--fg);color:var(--bg);
-  padding:10px 18px;border-radius:99px;font:500 14px var(--display);transition:transform .45s cubic-bezier(.3,1.5,.5,1);z-index:60;white-space:nowrap}
-.toast.show{transform:translate(-50%,0)}
+  padding:10px 18px;border-radius:99px;font:500 14px var(--display);transition:transform .45s cubic-bezier(.3,1.5,.5,1),visibility 0s .45s;z-index:60;white-space:nowrap;visibility:hidden}
+.toast.show{transform:translate(-50%,0);visibility:visible;transition:transform .45s cubic-bezier(.3,1.5,.5,1)}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 <style>
@@ -245,7 +240,7 @@ function render(){
     el.className="tonight first";
     el.innerHTML=`<div class="eyebrow">เริ่มต้นใช้งาน</div><div class="prod" style="font-size:30px">คืนนี้ทาตัวไหน?</div>
       <div class="sub">เลือกครั้งแรก แล้วแอพจะสลับให้อัตโนมัติทุกวัน</div>
-      <div class="pick"><button style="color:var(--dif)" onclick="mark('d')">Differin</button><button style="color:var(--aha)" onclick="mark('a')">กรดผลไม้</button></div>`;
+      <div class="pick"><button style="color:var(--dif-ink)" onclick="mark('d')">Differin</button><button style="color:var(--aha-ink)" onclick="mark('a')">กรดผลไม้</button></div>`;
   }else{
     const p=P[sug];
     el.className="tonight "+p.cls;
@@ -258,7 +253,7 @@ function render(){
         <svg class="check" viewBox="0 0 26 26" fill="none"><path d="M6 13.5l5 5 9-11" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         ${done?"เรียบร้อย":"ทาแล้ว"}</button>
       ${done?`<button class="undo" onclick="undo()">ยกเลิก กดผิด</button>`:""}
-      <div class="yday"><i class="dot" style="background:#fff;opacity:${y?1:.4}"></i>เมื่อวาน: ${y?P[y.p].name:"ไม่ได้บันทึก"}</div>`;
+      <div class="yday"><i class="dot" style="background:${y?css(P[y.p].css):"var(--line)"}"></i>เมื่อวาน: ${y?P[y.p].name:"ไม่ได้บันทึก"}</div>`;
   }
   $("streak").textContent=st.streak;
   $("rate").textContent=st.rate+"%";
@@ -338,7 +333,7 @@ function size(){cv.width=innerWidth*devicePixelRatio;cv.height=innerHeight*devic
 addEventListener("resize",size);size();
 function burst(x,y){
   if(matchMedia("(prefers-reduced-motion:reduce)").matches)return;
-  const cols=[css("--dif"),css("--aha"),css("--gold"),css("--ok"),"#ff5fa2"];
+  const cols=[css("--dif"),css("--aha"),css("--gold"),css("--dif-soft"),css("--aha-soft")];
   for(let i=0;i<90;i++){const a=Math.random()*Math.PI*2,s=4+Math.random()*9;
     parts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-6,r:3+Math.random()*4,c:cols[i%cols.length],rot:Math.random()*6,vr:(Math.random()-.5)*.4,life:1,sq:Math.random()<.5})}
   if(!raf)raf=requestAnimationFrame(tick);
